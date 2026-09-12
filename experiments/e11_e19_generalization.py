@@ -6,7 +6,7 @@ import logging
 import json
 from typing import Dict, Any
 
-from src.models.baselines import XGBoostModel
+from src.models.baselines import XGBoostModel, MLPModel
 from src.evaluation.metrics import compute_metrics
 from src.utils.config import load_config
 from src.utils.seed import set_seed
@@ -62,7 +62,7 @@ def run_experiment_e11_spatial_holdout(
     from sklearn.preprocessing import StandardScaler
     
     X = features[feature_cols].fillna(0).values
-    y = features['target'].values
+    y = np.log1p(features['target'].values)
     
     X_train = X[train_mask.values]
     y_train = y[train_mask.values]
@@ -151,7 +151,7 @@ def run_experiment_e12_temporal_holdout(
     from sklearn.preprocessing import StandardScaler
     
     X = features_sorted[feature_cols].fillna(0).values
-    y = features_sorted['target'].values
+    y = np.log1p(features_sorted['target'].values)
     
     X_train = X[train_mask.values]
     y_train = y[train_mask.values]
@@ -254,7 +254,7 @@ def run_experiment_e13_spatiotemporal_holdout(
     from sklearn.preprocessing import StandardScaler
     
     X = features_sorted[feature_cols].fillna(0).values
-    y = features_sorted['target'].values
+    y = np.log1p(features_sorted['target'].values)
     
     X_train = X[train_mask.values]
     y_train = y[train_mask.values]
@@ -336,9 +336,9 @@ def run_experiment_e18_unseen_watershed(
             continue
         
         X_train = train_data[feature_cols].fillna(0).values
-        y_train = train_data['target'].values
+        y_train = np.log1p(train_data['target'].values)
         X_test = test_data[feature_cols].fillna(0).values
-        y_test = test_data['target'].values
+        y_test = np.log1p(test_data['target'].values)
         
         scaler = StandardScaler()
         X_train_scaled = scaler.fit_transform(X_train)

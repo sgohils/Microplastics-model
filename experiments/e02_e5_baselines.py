@@ -37,6 +37,9 @@ def prepare_data(config: Dict[str, Any]):
     X = features[feature_cols].fillna(0).values
     y = features['target'].values
     
+    # Apply log1p transformation to target (consistent with E1)
+    y = np.log1p(y)
+    
     X_temp, X_test, y_temp, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )

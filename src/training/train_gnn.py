@@ -268,7 +268,7 @@ def train_model(
     
     # Setup scheduler
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode='min', patience=10, factor=0.5, verbose=True
+        optimizer, mode='min', patience=10, factor=0.5
     )
     
     # Setup loss

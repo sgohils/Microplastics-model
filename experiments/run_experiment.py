@@ -5,7 +5,7 @@ from pathlib import Path
 import json
 
 from src.utils.config import load_config
-from src.utils.logging import setup_logging
+from src.utils.logging import setup_logger as setup_logging
 from src.utils.seed import set_seed
 
 from .e01_baselines import run_experiment_e1

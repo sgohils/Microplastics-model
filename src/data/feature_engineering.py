@@ -24,7 +24,8 @@ class FeatureEngineer:
         observations: pd.DataFrame,
         streamgages: pd.DataFrame,
         graph: nx.DiGraph,
-        daymet_cache: Dict
+        daymet_cache: Dict,
+        streamflow_cache: Dict = None
     ) -> pd.DataFrame:
         """Build complete feature matrix for all observations.
         
@@ -41,7 +42,7 @@ class FeatureEngineer:
         
         for idx, row in observations.iterrows():
             feature_row = self._extract_features_for_observation(
-                row, streamgages, graph, daymet_cache
+                row, streamgages, graph, daymet_cache, streamflow_cache
             )
             feature_row['obs_index'] = idx
             features.append(feature_row)
@@ -61,7 +62,8 @@ class FeatureEngineer:
         obs: pd.Series,
         streamgages: pd.DataFrame,
         graph: nx.DiGraph,
-        daymet_cache: Dict
+        daymet_cache: Dict,
+        streamflow_cache: Dict = None
     ) -> Dict:
         """Extract all features for a single observation.
         
@@ -70,6 +72,7 @@ class FeatureEngineer:
             streamgages: Streamgage metadata
             graph: River network graph
             daymet_cache: Cached Daymet data
+            streamflow_cache: Cached USGS streamflow data
         
         Returns:
             Dictionary of features
@@ -78,6 +81,12 @@ class FeatureEngineer:
         obs_point = Point(obs['longitude'], obs['latitude'])
         sample_date = pd.to_datetime(obs['date'])
         
+        # Preserve watershed info for spatial split experiments
+        features['watershed'] = obs.get('watershed', 'unknown')
+        
+        # Preserve date for temporal split experiments
+        features['date'] = str(obs.get('date', ''))
+        
         # Geographic features
         features['latitude'] = obs['latitude']
         features['longitude'] = obs['longitude']
@@ -85,12 +94,17 @@ class FeatureEngineer:
         # Find nearest streamgage for hydrological data
         nearest_gage = self._find_nearest_streamgage(obs_point, streamgages)
         
-        # Hydrological features from nearest gage
+        # Hydrological features from nearest gage using real streamflow data
         if nearest_gage is not None:
-            gage_id = nearest_gage['site_no']
-            gage_data = daymet_cache.get('streamflow', {}).get(str(gage_id), {})
+            gage_id = str(nearest_gage['site_no'])
+            # Use real streamflow data if available, otherwise fall back to daymet_cache
+            streamflow_data = {}
+            if streamflow_cache and 'streamflow' in streamflow_cache:
+                streamflow_data = streamflow_cache['streamflow'].get(gage_id, {})
+            else:
+                streamflow_data = daymet_cache.get('streamflow', {}).get(gage_id, {})
             features.update(self._extract_hydrological_features(
-                gage_data, sample_date, gage_id
+                streamflow_data, sample_date, gage_id
             ))
         
         # Meteorological features from Daymet

@@ -25,9 +25,9 @@ def randomize_topology(graph: nx.DiGraph,
     """
     np.random.seed(seed)
     
-    # Extract degree sequences (only for nodes with edges)
-    in_degree_seq = [d for n, d in graph.in_degree() if not n.startswith('obs_')]
-    out_degree_seq = [d for n, d in graph.out_degree() if not n.startswith('obs_')]
+    # Extract degree sequences (only for non-observation nodes)
+    in_degree_seq = [d for n, d in graph.in_degree() if not str(n).startswith('obs_')]
+    out_degree_seq = [d for n, d in graph.out_degree() if not str(n).startswith('obs_')]
     
     # Use configuration model for directed graphs
     try:
@@ -42,8 +42,8 @@ def randomize_topology(graph: nx.DiGraph,
         edges = list(randomized.edges())
         
         # Shuffle targets while keeping sources
-        sources = [e[0] for e in edges if not e[0].startswith('obs_') and not e[1].startswith('obs_')]
-        targets = [e[1] for e in edges if not e[0].startswith('obs_') and not e[1].startswith('obs_')]
+        sources = [e[0] for e in edges if not str(e[0]).startswith('obs_') and not str(e[1]).startswith('obs_')]
+        targets = [e[1] for e in edges if not str(e[0]).startswith('obs_') and not str(e[1]).startswith('obs_')]
         
         np.random.shuffle(targets)
         

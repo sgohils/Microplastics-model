@@ -25,12 +25,16 @@ class DataValidator:
         Returns:
             Validated dataframe
         """
-        required_columns = ['latitude', 'longitude', 'date', 'particles_per_m3']
+        required_columns = ['latitude', 'longitude', 'date']
+        conc_col = 'particles_per_m3' if 'particles_per_m3' in df.columns else 'concentration_particles_per_m3'
         
         # Check required columns
         for col in required_columns:
             if col not in df.columns:
                 self.errors.append(f"Missing required column: {col}")
+        
+        if conc_col not in df.columns:
+            self.errors.append(f"Missing required column: {conc_col}")
         
         if self.errors:
             raise ValueError(f"Validation failed: {'; '.join(self.errors)}")
@@ -58,7 +62,7 @@ class DataValidator:
             )
         
         # Check concentration values
-        invalid_conc = df[df['particles_per_m3'] < 0]
+        invalid_conc = df[df[conc_col] < 0]
         if len(invalid_conc) > 0:
             self.errors.append(
                 f"Negative concentration values: {len(invalid_conc)} rows"
@@ -78,7 +82,7 @@ class DataValidator:
             )
         
         # Check for missing values
-        for col in required_columns:
+        for col in required_columns + [conc_col]:
             missing = df[col].isna().sum()
             if missing > 0:
                 self.warnings.append(
@@ -209,7 +213,7 @@ def run_validation_pipeline(raw_dir: Path,
             df = pd.read_csv(f)
             df_validated = validator.validate_microplastic_data(df)
             df_validated.to_csv(
-                output_dir / f.name.replace('.csv', '_validated.csv"), 
+                output_dir / f.name.replace('.csv', '_validated.csv'), 
                 index=False
             )
             results[f.name] = True

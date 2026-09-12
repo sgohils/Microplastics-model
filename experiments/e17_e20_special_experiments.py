@@ -49,7 +49,7 @@ def run_experiment_e17_sparse_data(
     from sklearn.model_selection import train_test_split
     
     X = features[feature_cols].fillna(0).values
-    y = features['target'].values
+    y = np.log1p(features['target'].values)
     
     X_full_train, X_test, y_full_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=seed
@@ -174,7 +174,7 @@ def run_experiment_e20_extreme_events(
     from sklearn.metrics import mean_absolute_error, mean_squared_error
     
     X = features[feature_cols].fillna(0).values
-    y = features['target'].values
+    y = np.log1p(features['target'].values)
     
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=seed

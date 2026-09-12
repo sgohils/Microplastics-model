@@ -174,20 +174,27 @@ def compare_models(results: Dict[str, Dict],
         row = {'model': model_name}
         
         if isinstance(model_results, dict):
+            # Check for 'test_rmse' or 'rmse' directly
             if metric in model_results:
                 row[metric] = model_results[metric]
+            elif 'test_rmse' in model_results and metric == 'rmse':
+                row[metric] = model_results['test_rmse']
             elif 'original_scale' in model_results and metric in model_results['original_scale']:
                 row[metric] = model_results['original_scale'][metric]
+            elif 'metrics_original_scale' in model_results and metric in model_results['metrics_original_scale']:
+                row[metric] = model_results['metrics_original_scale'][metric]
             
             # Add other metrics
             for key, val in model_results.items():
-                if isinstance(val, (int, float)):
+                if isinstance(val, (int, float)) and key not in row:
                     row[key] = val
         
         comparison.append(row)
     
     df = pd.DataFrame(comparison)
-    df = df.sort_values(metric)
+    # Only sort if the metric column exists
+    if metric in df.columns:
+        df = df.sort_values(metric)
     
     return df
 

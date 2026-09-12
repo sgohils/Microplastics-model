@@ -1,6 +1,7 @@
 """Baseline machine learning models for microplastic prediction."""
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from sklearn.linear_model import Ridge, LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
@@ -167,12 +168,22 @@ class XGBoostModel(BaseModel):
         if X_val is not None and y_val is not None:
             eval_set = [(X_train, y_train), (X_val, y_val)]
         
-        self.model.fit(
-            X_train, y_train,
-            eval_set=eval_set,
-            early_stopping_rounds=50,
-            verbose=False
-        )
+        # Handle API change: early_stopping_rounds may be in constructor or fit
+        try:
+            self.model.fit(
+                X_train, y_train,
+                eval_set=eval_set,
+                early_stopping_rounds=50,
+                verbose=False
+            )
+        except TypeError:
+            # Newer API: early_stopping_rounds passed to constructor or callbacks
+            self.model.fit(
+                X_train, y_train,
+                eval_set=eval_set,
+                verbose=False
+            )
+        
         self.is_fitted = True
         
         train_pred = self.model.predict(X_train)
@@ -183,8 +194,13 @@ class XGBoostModel(BaseModel):
             'train_mae': train_mae,
             'train_rmse': train_rmse,
             'train_r2': r2_score(y_train, train_pred),
-            'best_iteration': self.model.best_iteration_
         }
+        
+        # Handle best_iteration_ (newer XGBoost API)
+        if hasattr(self.model, 'best_iteration_'):
+            result['best_iteration'] = self.model.best_iteration_
+        elif hasattr(self.model, 'best_iteration'):
+            result['best_iteration'] = self.model.best_iteration
         
         if X_val is not None and y_val is not None:
             val_pred = self.model.predict(X_val)
@@ -345,7 +361,11 @@ class BaselineEnsemble(BaseModel):
     
     def __init__(self, config: Dict = None):
         super().__init__(config)
-        self.models = {}
+        self.models = {
+            'ridge': RidgeRegressor(config),
+            'rf': RandomForestModel(config),
+            'xgb': XGBoostModel(config),
+        }
     
     def fit(self, X_train, y_train, X_val=None, y_val=None):
         for name, model in self.models.items():
