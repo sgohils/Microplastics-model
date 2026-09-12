@@ -1,0 +1,52 @@
+# Data and experiment artifacts
+data/raw/
+data/interim/
+data/processed/
+data/external/
+
+# Experiment results and checkpoints
+experiments/results/
+experiments/logs/
+experiments/checkpoints/
+
+# Generated figures and tables
+figures/
+tables/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment
+.env
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Documentation builds
+_site/
