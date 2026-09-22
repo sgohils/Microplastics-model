@@ -36,7 +36,7 @@ This document describes all data sources used in the microplastic transport pred
 - **Spatial Coverage:** 29 tributaries across 6 Great Lakes states
 - **Temporal Coverage:** Spring 2014 - Spring 2015
 - **Number of Observations:** 29+ tributary sampling locations
-- **Units:** Particles per km² (surface), estimated conversion to particles/m³
+- **Units:** Particles per cubic meter (particles/m³)
 - **Variables:** Particle count, morphology, concentration
 - **Known Biases:** Surface sampling only, seasonal bias (spring/summer)
 - **Citation:** Baldwin, A. et al., 2016, Environmental Science & Technology
